@@ -5,8 +5,7 @@
 def parse_input(filename):
     with open(filename, "r") as f:
         test_cases = [case.split(" ") for case in f.readlines()[1:]]
-        test_cases = [(pancakes, int(k)) for pancakes, k in case
-                      for case in test_cases]
+        test_cases = [(pancakes, int(k)) for pancakes, k in test_cases]
 
     return test_cases
 
@@ -20,10 +19,32 @@ def flip(string, k, i):
 
 # actually solve problem
 def solve(pancakes, k):
-    n = len(pancakes)
     # Lemma: if an endpoint pancake p is '-', it must be flipped exactly once.
     # pf: if it's '-' it needs flipped an odd number of times, and there is
     # exactly one window (0 through k-1)
+    left = 0
+    right = len(pancakes)
+    side = "left"
+    count = 0
+
+    while right - left > k-1:
+        if side == "left":
+            if pancakes[left] == '-':
+                count += 1
+                pancakes = flip(pancakes, k, left)
+            side = "right"
+            left += 1
+        elif side == "right":
+            if pancakes[right-1] == '-':
+                count += 1
+                pancakes = flip(pancakes, k, right-k)
+                side = "left"
+            right -= 1
+
+    if '-' in pancakes:
+        return "IMPOSSIBLE"
+    else:
+        return count
 
 
 # make this file a runnable script
@@ -41,7 +62,7 @@ if __name__ == "__main__":
         outfname = path.splitext(infname)[0] + ".out"
 
         test_cases = parse_input(arguments[1])
-        results = [solve(case) for case in test_cases]
+        results = [solve(pancakes, k) for pancakes, k in test_cases]
         with open(outfname, "w") as f:
             f.write("\n".join(
                 "Case #{index}: {result}".format(index=i+1, result=r) for
